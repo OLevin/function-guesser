@@ -1,10 +1,17 @@
+/*
+ * To do-  
+ *      Use Stringbuilder for feedback instead of concatenation
+ *      Add new functions to guess
+ *      check over assumptions every method makes and fix them if possible to handle them failing
+ *      improve I/O handling
+ */
+
 import javax.swing.*;
 import java.awt.*;
 import static java.nio.file.StandardOpenOption.*;
 import java.nio.file.*;
 import java.io.*;
 import java.awt.event.*;
-
 /**
  * Choose a root and be given numbers, the roots of which you guess. 
  * You'll be given your percent error and and told over or under the root.
@@ -391,13 +398,13 @@ public class RootGuesser extends JFrame implements WindowListener
         String[] x = new String[3];
         switch (root) 
         {
-            case 2:  x = new String[]{" squared is ","\n The actual square root was "," square root of "};
+            case 2:  x = new String[]{" squared is ","\n           The actual square root was "," square root of "};
                      break;
-            case 3:  x = new String[]{" cubed is ","\n The actual cubed root was "," cubed root of "};
+            case 3:  x = new String[]{" cubed is ","\n            The actual cubed root was "," cubed root of "};
                      break;
-            case 4:  x = new String[]{" to the fourth power is ","\n The actual fourth root was "," fourth root of "};
+            case 4:  x = new String[]{" to the fourth power is ","\n             The actual fourth root was "," fourth root of "};
                      break;
-            case 6:  x = new String[]{" to the sixth power is ","\n The actual sixth root was "," sixth root of "};
+            case 6:  x = new String[]{" to the sixth power is ","\n             The actual sixth root was "," sixth root of "};
                      break;
             default: x = new String[]{"","",""};
         }
@@ -422,31 +429,58 @@ public class RootGuesser extends JFrame implements WindowListener
             overOrUnder = "You were under by ";
         }
         double answer = Math.pow(numberToBeGuessed*1.0, 1.0/root);
+        
+        for(int i = 0; i <= 100; i += 1)
+        {
+            if(Math.abs(i-answer) < EPSILON)
+            {
+                answer = i;
+            }
+        }
+        
         double positivePercentageError = (Math.abs(guess - answer)/answer*10000)/100.0;
         if(Math.abs(answer-guess) < EPSILON)
         {
             positivePercentageError = 0;
             answer = guess;
-            overOrUnder = "You were off by ";
+            overOrUnder = "            You were off by ";
         }
         String feedback = "";
         
         //create feedback
         feedback += overOrUnder + positivePercentageError + 
-                    " percent. \n" + guess + rootSpecifiedWord[0] + 
-                    Math.pow(guess,root)+ rootSpecifiedWord[1] + 
+                    " percent. \n                " + guess + rootSpecifiedWord[0] + 
+                       Math.pow(guess,root)+ rootSpecifiedWord[1] + 
                     answer;
-        if (positivePercentageError < .1)
+        if(settingIsDecimal)
         {
-            feedback += "\n          Congratulations on that amazing guess!";
-        } 
-        else if (positivePercentageError < 1)
-        {
-            feedback += "\n                                     Great job!";
+            if (positivePercentageError < .1)
+            {
+                feedback += "\n          Congratulations on that amazing guess!";
+            } 
+            else if (positivePercentageError < 1)
+            {
+                feedback += "\n                                     Great job!";
+            }
+            else if(Math.floor(positivePercentageError) > root)
+            {
+                feedback += "\n                                     UR A SCRUB";//"\n                Oh well, better luck next time!";
+            }
         }
-        else if(Math.floor(positivePercentageError) > root)
+        else
         {
-            feedback += "\n                                     UR A SCRUB";//"\n                Oh well, better luck next time!";
+            if (positivePercentageError < .1)
+            {
+                feedback += "\n   Congratulations on that amazing guess!";
+            } 
+            else if (positivePercentageError < 1)
+            {
+                feedback += "\n                              Great job!";
+            }
+            else if(Math.floor(positivePercentageError) > root)
+            {
+                feedback += "\n                              UR A SCRUB";//"\n                Oh well, better luck next time!";
+            }
         }
         JOptionPane.showMessageDialog(new JFrame(),feedback,"Percent Error:" + rootSpecifiedWord[2] + numberToBeGuessed,JOptionPane.PLAIN_MESSAGE);
                 
